@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .container {
+        text-align: center;
+    }
+    label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+    input[type="text"] {
+        width: 300px;
+        padding: 10px;
+        font-size: 16px;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+    input[type="text"][readonly] {
+        background-color: #f3f3f3;
+    }
+</style>
+<div class="container">
+    <h2>English to French Translator</h2>
+    <label for="englishText">Enter English text:</label>
+    <input type="text" id="englishText" placeholder="Enter English text">
+    <br>
+    <button onclick="translatee()">Translate</button>
+    <br>
+    <label for="frenchText">French translation:</label>
+    <input type="text" id="frenchText" placeholder="French translation" readonly>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function(){
+        })
+
+        function translatee() {
+            var englishText = document.getElementById("englishText").value;
+
+            $.ajax({
+            type: "POST",
+            url: "/translate",
+            contentType: "application/json", 
+            data: JSON.stringify({ text: englishText }),
+            success: function(response) {
+                $("#frenchText").val(response.translation);
+            },
+            error: function() {
+                // Handle errors if any
+                $("#frenchText").val("Error occurred during translation");
+            }
+        });
+        
+        
+        document.getElementById("frenchText").value = translatedText;
+    }
+    </script>
+    {% endblock %}

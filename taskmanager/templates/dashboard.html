@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Task Management</h1>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Due Date</th>
+                    <th>Created Date</th>
+                    <th>Priority</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr id="task-{{ task.id }}">
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.status }}</td>
+                    <td>{{ task.description }}</td>
+                    <td>{{ task.due_date }}</td>
+                    <td>{{ task.created_date }}</td>
+                    <td>{{ task.priority }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editTask({{ task.id }})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask({{ task.id }})">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- Form to add new task -->
+        <form id="task-form">
+            <div class="form-group">
+                <input type="text" name="title" class="form-control" placeholder="Title" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="status" class="form-control" placeholder="Status" required>
+            </div>
+            
+
+            <div class="form-group">
+                <input type="text" name="description" class="form-control" placeholder="Description" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="due_date" id="due_date" class="form-control" placeholder="Due Date" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="created_date" id="created_date" class="form-control" placeholder="Created Date" required>
+            </div>
+            <div class="form-group">
+                <select class="form-control" name="priority" required>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+    {% endblock content %}
+
+    {% block scripts %}
+    <script>
+        $(document).ready(function(){
+            // Initialize Bootstrap Datepicker for "Due Date" field
+            $('#due_date').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true
+            });
+
+            // Function to fetch tasks and populate the table
+            function fetchTasks() {
+                $.get('/tasks', function(data) {
+                    $('#task-list').empty(); // Clear existing tasks
+                    data.forEach(function(task) {
+                        $('#task-list').append(`
+                            <tr id="task-${task.id}">
+                                <td>${task.title}</td>
+                                <td>${task.status}</td>
+                                <td>${task.description}</td>
+                                <td>${task.due_date}</td>
+                                <td>${task.created_date}</td>
+                                <td>${task.priority}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" onclick="editTask(${task.id})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteTask(${task.id})">Delete</button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+                });
+            }
+
+            // Fetch tasks on page load
+            // fetchTasks();
+
+            // Submit form to add new task
+            $('#task-form').submit(function(event) {
+                event.preventDefault();
+                $.post('/tasks', $(this).serialize(), function(data) {
+                    if (data.success) {
+                        fetchTasks(); // Refresh tasks after adding new task
+                        $('#task-form')[0].reset(); // Reset form fields
+                    } else {
+                        alert('Failed to add task');
+                    }
+                });
+            });
+        });
+
+        // Function to handle task deletion
+        function deleteTask(id) {
+            $.ajax({
+                url: `/tasks/${id}`,
+                type: 'DELETE',
+                success: function(data) {
+                    if (data.success) {
+                        $(`#task-${id}`).remove(); // Remove task from table
+                    } else {
+                        alert('Failed to delete task');
+                    }
+                }
+            });
+        }
+
+        // Function to handle task editing (redirect to edit page or open modal)
+        function editTask(id) {
+            // Implement your edit functionality here
+            alert(`Edit task with ID: ${id}`);
+        }
+    </script>
+    {% endblock %}
+
